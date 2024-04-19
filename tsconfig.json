@@ -15,6 +15,11 @@
     "plugins": [
       {
         "name": "next"
+      },
+      {
+        "name": "@0no-co/graphqlsp",
+        "schema": "https://graphql.anilist.co",
+        "tadaOutputLocation": "./graphql-env.d.ts"
       }
     ],
     "paths": {
