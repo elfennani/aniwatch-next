@@ -20,7 +20,9 @@ export default function RootLayout({
     <Providers>
       <CookiesProvider>
         <html lang="en">
-          <body className={inter.className}>{children}</body>
+          <body className={`${inter.className} bg-zinc-900 text-white`}>
+            {children}
+          </body>
         </html>
       </CookiesProvider>
     </Providers>

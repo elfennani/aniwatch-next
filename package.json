@@ -12,13 +12,18 @@
     "@tanstack/react-query": "^5.29.2",
     "gql.tada": "^1.5.4",
     "graphql-request": "^6.1.0",
+    "hls.js": "^1.5.8",
     "next": "14.2.2",
     "next-client-cookies": "^1.1.1",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "string-to-color": "^2.2.2",
+    "videojs-contrib-hls": "^5.15.0",
+    "videojs-hls-quality-selector": "^2.0.0"
   },
   "devDependencies": {
     "@0no-co/graphqlsp": "^1.10.1",
+    "@iconify/react": "^4.1.1",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -26,6 +31,7 @@
     "eslint-config-next": "14.2.2",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "video.js": "^8.10.0"
   }
 }
