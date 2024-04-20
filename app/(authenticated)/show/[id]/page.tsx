@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import useAniListClient from "../../lib/hooks/useAniListClient.server";
 import stc from "string-to-color";
 import ShowEpisodes from "./components/ShowEpisodes";
+import Loading from "./loading";
 
 interface Props {
   params: {
@@ -79,7 +80,7 @@ const ShowById: NextPage<Props> = async ({ params: { id } }) => {
       <section className="px-8 py-4">
         <h2 className="text-sm font-semibold mb-4">Synopsis</h2>
         <p
-          className="text-sm leading-snug"
+          className="text-sm leading-snug text-zinc-100"
           dangerouslySetInnerHTML={{ __html: show?.description ?? "" }}
         />
       </section>

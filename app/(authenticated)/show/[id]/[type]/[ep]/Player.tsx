@@ -49,6 +49,8 @@ const Player = (props: Props) => {
     return () => {
       hlsRef.current?.off(Events.MANIFEST_PARSED, onLevelLoaded);
       hlsRef.current?.off(Events.LEVEL_SWITCHED, onLevelChanged);
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
     };
   }, [props.url]);
 
@@ -84,7 +86,7 @@ const Player = (props: Props) => {
     : "tabler:player-play-filled";
 
   return (
-    <div ref={videoContainerRef} className="relative aspect-video">
+    <div ref={videoContainerRef} className="relative aspect-video w-full">
       <video
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}

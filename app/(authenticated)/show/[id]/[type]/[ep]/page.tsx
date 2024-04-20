@@ -1,11 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 import { graphql } from "gql.tada";
 import { NextPage } from "next";
-import PlayerLoader from "./PlayerLoader";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import useAllAnimeClient from "@/app/(authenticated)/lib/hooks/useAllAnimeClient";
 import useAniListClient from "@/app/(authenticated)/lib/hooks/useAniListClient.server";
+import Playlist from "./Playlist";
 
 interface Props {
   params: {
@@ -21,9 +20,9 @@ interface ShowQuery {
         _id: string;
         aniListId: number;
         availableEpisodesDetail: {
-          sub: number[];
-          dub: number[];
-          raw: number[];
+          sub: string[];
+          dub: string[];
+          raw: string[];
         };
       }
     ];
@@ -83,35 +82,22 @@ const WatchByIdPage: NextPage<Props> = async ({ params: { id, ep } }) => {
 
   if (!show) redirect("/");
 
+  const params = new URLSearchParams({
+    showId: show._id,
+    max: (show.availableEpisodesDetail.sub.length + 1).toString(),
+  }).toString();
+
+  const res = await fetch(`${process.env.URL}/api/episodes?${params}`);
+  const episodes = await res.json();
+
   return (
-    <div className="h-dvh flex flex-col">
-      <PlayerLoader showId={show?._id} episode={Number(ep)} />
-      <ul className="overflow-y-scroll h-full">
-        {show.availableEpisodesDetail.sub.map((epNum) => (
-          <li key={epNum}>
-            <Link
-              className={`w-full p-4 flex items-center gap-4 ${
-                epNum.toString() == ep && "bg-purple-900"
-              }`}
-              href={`/show/${id}/watch/${epNum}`}
-            >
-              <img
-                src={`https://wp.youtube-anime.com/aln.youtube-anime.com/data2/ep_tbs/${show._id}/${epNum}_sub.jpg?w=380`}
-                alt={epNum.toString()}
-                width={124}
-                className="rounded"
-              />
-              <div>
-                <p>Episode {epNum}</p>
-                {epNum.toString() == ep && (
-                  <p className="font-medium text-sm">Currently Watching</p>
-                )}
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Playlist
+      availableEpisodes={show.availableEpisodesDetail}
+      showId={show._id}
+      id={id}
+      episodes={episodes}
+      episode={ep}
+    />
   );
 };
 
