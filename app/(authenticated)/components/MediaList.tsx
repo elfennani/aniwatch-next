@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
-import useMediaListQuery from "../lib/hooks/useMediaListQuery";
 import Link from "next/link";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { graphql } from "gql.tada";
