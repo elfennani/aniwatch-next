@@ -44,7 +44,7 @@ const Episode = ({
         block: "center",
       });
     }
-  }, [active]);
+  }, [active, ep]);
 
   return (
     <li ref={listElementRef}>
