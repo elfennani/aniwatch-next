@@ -25,9 +25,6 @@ const Episode = ({
 }: Props) => {
   const listElementRef = useRef<HTMLLIElement>(null);
   const { ep } = useParams<{ ep: string }>();
-  if (ep == episode) {
-    active = true;
-  }
   const thumbnail = useMemo(() => {
     let thumbnail = details.thumbnails.filter((t) => !t.includes("cdnfile"))[0];
     if (!thumbnail.startsWith("http")) {
@@ -38,13 +35,13 @@ const Episode = ({
   }, [details]);
 
   useEffect(() => {
-    if (active) {
+    if (active || ep == episode) {
       listElementRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
     }
-  }, [active, ep]);
+  }, [active, ep, episode]);
 
   return (
     <li ref={listElementRef}>
@@ -63,11 +60,12 @@ const Episode = ({
           <h2>Episode {episode}</h2>
           <p className="text-xs mt-1 uppercase text-zinc-400">
             sub {hasDub && "• dub"}{" "}
-            {active && (
-              <span className="font-bold text-purple-500">
-                • Currently Watching
-              </span>
-            )}
+            {active ||
+              (ep == episode && (
+                <span className="font-bold text-purple-500">
+                  • Currently Watching
+                </span>
+              ))}
           </p>
           {details.vidInforssub && (
             <p className="text-xs mt-1 text-zinc-400">
