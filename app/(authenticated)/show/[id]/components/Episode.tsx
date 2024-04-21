@@ -1,9 +1,10 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
-import React from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { EpisodeDetail } from "./ShowEpisodes";
 import Link from "next/link";
 import secondsToHms from "@/app/(authenticated)/lib/utils/secondsToHms";
+import { useParams } from "next/navigation";
 
 type Props = {
   id: number;
@@ -22,14 +23,31 @@ const Episode = ({
   onClick,
   active = false,
 }: Props) => {
-  let thumbnail = details.thumbnails.filter((t) => !t.includes("cdnfile"))[0];
-  if (!thumbnail.startsWith("http")) {
-    thumbnail =
-      "https://wp.youtube-anime.com/aln.youtube-anime.com" + thumbnail;
+  const listElementRef = useRef<HTMLLIElement>(null);
+  const { ep } = useParams<{ ep: string }>();
+  if (ep == episode) {
+    active = true;
   }
+  const thumbnail = useMemo(() => {
+    let thumbnail = details.thumbnails.filter((t) => !t.includes("cdnfile"))[0];
+    if (!thumbnail.startsWith("http")) {
+      thumbnail =
+        "https://wp.youtube-anime.com/aln.youtube-anime.com" + thumbnail;
+    }
+    return thumbnail;
+  }, [details]);
+
+  useEffect(() => {
+    if (active) {
+      listElementRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [active]);
 
   return (
-    <li>
+    <li ref={listElementRef}>
       <Link
         className="flex items-center gap-4 hover:bg-zinc-800 transition-colors rounded"
         href={`/show/${id}/sub/${episode}`}

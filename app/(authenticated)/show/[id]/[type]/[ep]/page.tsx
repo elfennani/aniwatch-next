@@ -4,7 +4,7 @@ import { NextPage } from "next";
 import { redirect } from "next/navigation";
 import useAllAnimeClient from "@/app/(authenticated)/lib/hooks/useAllAnimeClient";
 import useAniListClient from "@/app/(authenticated)/lib/hooks/useAniListClient.server";
-import Playlist from "./Playlist";
+import Player from "./Player";
 
 interface Props {
   params: {
@@ -60,6 +60,7 @@ const media_query = graphql(`
 const WatchByIdPage: NextPage<Props> = async ({ params: { id, ep } }) => {
   const allanime = useAllAnimeClient();
   const anilist = useAniListClient();
+  const URL = process.env.URL;
 
   const media = await anilist.request(media_query, { id: Number(id) });
   let showSearch: ShowQuery;
@@ -87,18 +88,17 @@ const WatchByIdPage: NextPage<Props> = async ({ params: { id, ep } }) => {
     max: (show.availableEpisodesDetail.sub.length + 1).toString(),
   }).toString();
 
-  const res = await fetch(`${process.env.URL}/api/episodes?${params}`);
+  const res = await fetch(`${URL}/api/episodes?${params}`);
   const episodes = await res.json();
 
-  return (
-    <Playlist
-      availableEpisodes={show.availableEpisodesDetail}
-      showId={show._id}
-      id={id}
-      episodes={episodes}
-      episode={ep}
-    />
-  );
+  const linkParams = new URLSearchParams({
+    showId: show._id,
+    episode: ep,
+  }).toString();
+  const linkRes = await fetch(`${URL}/api/link?${linkParams}`);
+  const link = (await linkRes.json()).link;
+
+  return <Player url={link} />;
 };
 
 export default WatchByIdPage;

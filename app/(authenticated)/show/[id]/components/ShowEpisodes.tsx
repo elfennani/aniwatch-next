@@ -6,6 +6,7 @@ import Episode from "./Episode";
 
 type Props = {
   id: number;
+  currentEpisode?: number;
 };
 
 export interface EpisodeDetail {
@@ -35,7 +36,7 @@ const episodes_details_query = `
   }
 `;
 
-const ShowEpisodes = async ({ id }: Props) => {
+const ShowEpisodes = async ({ id, currentEpisode }: Props) => {
   const client = useAllAnimeClient();
   const res = await fetch(`${process.env.URL}/api/show/${id}`, {
     headers: { Cookie: cookies().toString() },
@@ -50,6 +51,7 @@ const ShowEpisodes = async ({ id }: Props) => {
     <ul className="flex flex-col-reverse gap-4">
       {show.availableEpisodesDetail.sub.map((ep) => (
         <Episode
+          active={currentEpisode == Number(ep)}
           key={ep}
           id={id}
           episode={ep}
