@@ -2,6 +2,7 @@ import { ShowDetails } from "@/interfaces/ShowDetails";
 import AllAnimeClient from "@/utils/allanime-client";
 import AnilistServerClient from "@/utils/anilist-server-client";
 import { graphql } from "gql.tada";
+import { NextResponse } from "next/server";
 import { retry } from "ts-retry-promise";
 
 interface Params {
@@ -27,8 +28,6 @@ export const GET = async (request: Request, { params: { id: idString } }: Params
   if (!show) {
     return Response.json({ error: "Failed to find allanime show" }, { status: 404 })
   }
-
-  console.log(show)
 
   const showId = show._id
   const max = show.availableEpisodesDetail.sub.length
@@ -62,7 +61,7 @@ export const GET = async (request: Request, { params: { id: idString } }: Params
     }))
   }
 
-  return Response.json(showDetails)
+  return NextResponse.json(showDetails)
 }
 
 // Thumbnail source for the ones without domain in them

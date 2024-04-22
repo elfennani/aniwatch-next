@@ -31,12 +31,13 @@ export const GET = async (request: Request) => {
   const { searchParams } = new URL(request.url);
   const showId = searchParams.get("showId")
   const episode = searchParams.get("episode")
+  const translationType = searchParams.get("type")
 
   const response: QueryEpisode = await retry(
     () => client.request(query_episode, {
       showId,
       episodeString: episode,
-      translationType: "sub",
+      translationType,
     }),
     { retries: 3 }
   );

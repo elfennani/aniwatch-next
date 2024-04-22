@@ -1,7 +1,7 @@
 import { ShowDetails } from "@/interfaces/ShowDetails";
-import server_fetch from "@/utils/server-fetch";
 import React from "react";
 import EpisodeItem from "./episode-item";
+import server_fetch from "@/utils/server-fetch";
 
 type Props = {
   id: number;

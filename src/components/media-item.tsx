@@ -27,7 +27,7 @@ const MediaItem = ({
           {canContinue && (
             <Link
               className="text-purple-500 text-sm underline flex items-center gap-2 active:text-purple-800"
-              href={`/show/${id}/sub/${progress + 1}`}
+              href={`/watch/${id}/sub/${progress + 1}`}
             >
               <Icon icon="tabler:player-play-filled" />
               Continue Watching

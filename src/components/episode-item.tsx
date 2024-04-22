@@ -16,7 +16,7 @@ const EpisodeItem = ({
   id,
 }: Props) => {
   const listElementRef = useRef<HTMLLIElement>(null);
-  const { ep } = useParams<{ ep: string }>();
+  const { ep, type } = useParams<{ ep: string; type?: "sub" | "dub" }>();
   const active = Number(ep) == number;
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const EpisodeItem = ({
     <li ref={listElementRef}>
       <Link
         className="flex items-center gap-4 hover:bg-zinc-800 transition-colors rounded"
-        href={`/show/${id}/sub/${number}`}
+        href={`/watch/${id}/${type || "sub"}/${number}`}
       >
         <img
           src={thumbnail}

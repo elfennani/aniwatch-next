@@ -1,6 +1,6 @@
-import { Suspense } from "react";
-import Episodes from "../../../../../components/episodes";
-import EpisodesSkeleton from "../../../../../components/episodes-skeleton";
+import React, { Suspense } from "react";
+import Episodes from "@/components/episodes";
+import EpisodesSkeleton from "@/components/episodes-skeleton";
 
 export default function Layout({
   children,
