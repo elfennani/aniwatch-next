@@ -6,27 +6,13 @@ import { ShowDetails } from "@/interfaces/ShowDetails";
 import EpisodeItem from "@/components/episode-item";
 import { cache } from "react";
 import { stripHtml } from "string-strip-html";
+import Title from "@/components/title-setter-client";
 
 interface Props {
   params: {
     id: string;
   };
 }
-
-export const generateMetadata = async ({
-  params: { id },
-}: Props): Promise<Metadata> => {
-  const show = await fetchShow(id);
-
-  return {
-    title: show.title,
-    openGraph: {
-      title: show.title,
-      description: stripHtml(show.description).result,
-      type: "video.tv_show",
-    },
-  };
-};
 
 const fetchShow = cache(async (id: string) => {
   const res = await server_fetch(`/api/show/${id}`);
@@ -40,6 +26,7 @@ const ShowById: NextPage<Props> = async ({ params: { id } }) => {
 
   return (
     <main>
+      <Title>{`${show.title} • AniWatch`}</Title>
       <header className="relative p-8">
         <img
           src={show.banner}

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-children-prop */
 /* eslint-disable @next/next/no-img-element */
 import { Metadata, NextPage } from "next";
 import Player from "./Player";
@@ -7,6 +8,7 @@ import { redirect } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import Link from "next/link";
 import { cache } from "react";
+import Title from "@/components/title-setter-client";
 
 interface Props {
   params: {
@@ -15,24 +17,6 @@ interface Props {
     type: "sub" | "dub";
   };
 }
-
-export const generateMetadata = async ({
-  params: { id, ep, type },
-}: Props): Promise<Metadata> => {
-  const show = await fetchShow(Number(id));
-
-  return {
-    title: `${show.title} • Ep. ${ep}`,
-    openGraph: {
-      title: `${show.title} • Ep. ${ep}`,
-      type: "video.episode",
-      images: show.episodes.find((episode) => episode.number == Number(ep))!
-        .thumbnail,
-      url: `${process.env.URl}/watch/${id}/${type}/${ep}`,
-      siteName: "AniWatch",
-    },
-  };
-};
 
 const fetchShow = cache(async (id: number) => {
   const res = await server_fetch(`/api/show/${id}`);
@@ -60,6 +44,7 @@ const WatchByIdPage: NextPage<Props> = async ({ params: { id, ep, type } }) => {
 
   return (
     <div>
+      <Title children={`${show.title} • Ep. ${ep} • AniWatch`} />
       <Player url={link} />
       {dubbed && (
         <div className="flex">
