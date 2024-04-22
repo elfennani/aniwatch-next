@@ -1,11 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
-import { NextPage } from "next";
+import { Metadata, NextPage } from "next";
 import Player from "./Player";
 import server_fetch from "@/utils/server-fetch";
 import { ShowDetails } from "@/interfaces/ShowDetails";
 import { redirect } from "next/navigation";
-import { twJoin, twMerge } from "tailwind-merge";
+import { twMerge } from "tailwind-merge";
 import Link from "next/link";
+import { cache } from "react";
 
 interface Props {
   params: {
@@ -14,11 +15,36 @@ interface Props {
     type: "sub" | "dub";
   };
 }
-const WatchByIdPage: NextPage<Props> = async ({ params: { id, ep, type } }) => {
+
+export const generateMetadata = async ({
+  params: { id, ep, type },
+}: Props): Promise<Metadata> => {
+  const show = await fetchShow(Number(id));
+
+  return {
+    title: `${show.title} • Ep. ${ep}`,
+    openGraph: {
+      title: `${show.title} • Ep. ${ep}`,
+      type: "video.episode",
+      images: show.episodes.find((episode) => episode.number == Number(ep))!
+        .thumbnail,
+      url: `${process.env.URl}/watch/${id}/${type}/${ep}`,
+      siteName: "AniWatch",
+    },
+  };
+};
+
+const fetchShow = cache(async (id: number) => {
   const res = await server_fetch(`/api/show/${id}`);
   const show: ShowDetails = await res.json();
 
+  return show;
+});
+
+const WatchByIdPage: NextPage<Props> = async ({ params: { id, ep, type } }) => {
   if (!["sub", "dub"].includes(type)) redirect("/");
+
+  const show = await fetchShow(Number(id));
 
   const linkParams = new URLSearchParams({
     showId: show.allanimeId,

@@ -21,9 +21,11 @@ const MediaItem = ({
       <div className="p-4 flex flex-col justify-between flex-1">
         <Link href={`/show/${id}`}>{title}</Link>
         <div className="flex w-full justify-between items-end">
-          <p className="text-xs text-zinc-500">
-            ({progress}/{episodes})
-          </p>
+          {!!progress && (
+            <p className="text-xs text-zinc-500">
+              ({progress}/{episodes})
+            </p>
+          )}
           {canContinue && (
             <Link
               className="text-purple-500 text-sm underline flex items-center gap-2 active:text-purple-800"

@@ -1,9 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
-import { NextPage } from "next";
+import { Metadata, NextPage } from "next";
 import stc from "string-to-color";
 import server_fetch from "@/utils/server-fetch";
 import { ShowDetails } from "@/interfaces/ShowDetails";
 import EpisodeItem from "@/components/episode-item";
+import { cache } from "react";
+import { stripHtml } from "string-strip-html";
 
 interface Props {
   params: {
@@ -11,9 +13,30 @@ interface Props {
   };
 }
 
-const ShowById: NextPage<Props> = async ({ params: { id } }) => {
+export const generateMetadata = async ({
+  params: { id },
+}: Props): Promise<Metadata> => {
+  const show = await fetchShow(id);
+
+  return {
+    title: show.title,
+    openGraph: {
+      title: show.title,
+      description: stripHtml(show.description).result,
+      type: "video.tv_show",
+    },
+  };
+};
+
+const fetchShow = cache(async (id: string) => {
   const res = await server_fetch(`/api/show/${id}`);
   const show: ShowDetails = await res.json();
+
+  return show;
+});
+
+const ShowById: NextPage<Props> = async ({ params: { id } }) => {
+  const show = await fetchShow(id);
 
   return (
     <main>
@@ -23,7 +46,7 @@ const ShowById: NextPage<Props> = async ({ params: { id } }) => {
           alt={show.title}
           className="absolute top-0 left-0 w-full h-full object-cover -z-20"
         />
-        <div className="-z-10 absolute top-0 left-0 w-full h-full bg-gradient-to-t from-zinc-900 to-transparent" />
+        <div className="-z-10 absolute top-0 left-0 w-full h-full bg-gradient-to-t from-zinc-900" />
         <div className="-z-10 absolute top-0 left-0 w-full h-full bg-zinc-900 bg-opacity-20" />
         <div className="flex">
           <img className="w-32 rounded" src={show.cover} alt={show.title} />

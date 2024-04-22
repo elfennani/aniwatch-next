@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import plugin from "tailwindcss/plugin";
+import { iconsPlugin, getIconCollections } from "@egoist/tailwindcss-icons"
 
 const config: Config = {
   content: [
@@ -20,8 +21,12 @@ const config: Config = {
   },
 
 
-  plugins: [plugin(({ addVariant }) => {
-    addVariant("progress-bar", ["&::-moz-progress-bar", "&::-webkit-progress-value"])
-  })],
+  plugins: [
+    plugin(({ addVariant }) => {
+      addVariant("progress-bar", ["&::-moz-progress-bar", "&::-webkit-progress-value"])
+    }),
+    iconsPlugin({
+      collections: getIconCollections(["tabler"]),
+    }),],
 };
 export default config;
