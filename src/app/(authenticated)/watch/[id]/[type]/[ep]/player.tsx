@@ -1,15 +1,21 @@
 "use client";
 import secondsToHms from "@/utils/seconds-to-hms";
-import { Icon } from "@iconify/react/dist/iconify.js";
-import Hls, { Events, Level, LevelsUpdatedData } from "hls.js";
+import Hls, { Events, Level } from "hls.js";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import React, { MouseEventHandler, useEffect, useRef, useState } from "react";
+import { MouseEventHandler, useEffect, useRef, useState } from "react";
 import { twJoin, twMerge } from "tailwind-merge";
 
 type Props = {
   url: string;
   isDubbed: boolean;
+  watched: boolean;
+};
+
+type Params = {
+  type: "sub" | "dub";
+  ep: string;
+  id: string;
 };
 
 const Player = (props: Props) => {
@@ -23,6 +29,8 @@ const Player = (props: Props) => {
   const [currentLevel, setCurrentLevel] = useState<number>(NaN);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [updatedEntry, setUpdatedEntry] = useState(false);
+  const params = useParams<Params>();
 
   useEffect(() => {
     if (!document) return;
@@ -32,6 +40,19 @@ const Player = (props: Props) => {
 
     return () => document.removeEventListener("fullscreenchange", handleChange);
   }, []);
+
+  useEffect(() => {
+    if (progress / duration > 0.8 && !props.watched && !updatedEntry) {
+      fetch("/api/watched", {
+        method: "POST",
+        body: JSON.stringify({
+          show: Number(params.id),
+          episode: Number(params.ep),
+        }),
+      });
+      setUpdatedEntry(true);
+    }
+  }, [progress, duration, params, updatedEntry, props.watched]);
 
   useEffect(() => {
     if (!hlsRef.current) {
@@ -85,10 +106,6 @@ const Player = (props: Props) => {
     const video = videoRef.current!!;
     video.currentTime = pos * video.duration;
   };
-
-  const playStatusIcon = isPlaying
-    ? "tabler:player-pause-filled"
-    : "tabler:player-play-filled";
 
   return (
     <div ref={videoContainerRef} className="relative aspect-video w-full">
@@ -181,11 +198,7 @@ const Settings = ({
     typeof localStorage != "undefined" &&
       localStorage.getItem("autoplay") == "1"
   );
-  const { type, id, ep } = useParams<{
-    type: "sub" | "dub";
-    ep: string;
-    id: string;
-  }>();
+  const { type, id, ep } = useParams<Params>();
 
   return (
     <div className="absolute flex flex-col top-2 right-2 bottom-16 w-40 bg-zinc-800 text-zinc-200 rounded-lg">

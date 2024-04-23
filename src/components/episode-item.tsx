@@ -21,10 +21,11 @@ const EpisodeItem = ({
 
   const translation = useMemo(() => {
     if (typeof localStorage === "undefined") return "sub";
+    if (!dub) return "sub";
     const type = localStorage.getItem("translation") as "sub" | "dub" | null;
 
     return type || "sub";
-  }, []);
+  }, [dub]);
 
   useEffect(() => {
     if (Number(ep) == number) {

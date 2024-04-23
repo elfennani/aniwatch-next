@@ -30,6 +30,13 @@ const WatchByIdPage: NextPage<Props> = async ({ params: { id, ep, type } }) => {
 
   const show = await fetchShow(Number(id));
 
+  if (
+    !show.episodes.find((episode) => episode.number == Number(ep))?.dub &&
+    type == "dub"
+  ) {
+    redirect(process.env.URL + `/watch/${id}/sub/${ep}`);
+  }
+
   const linkParams = new URLSearchParams({
     showId: show.allanimeId,
     episode: ep,
@@ -45,7 +52,11 @@ const WatchByIdPage: NextPage<Props> = async ({ params: { id, ep, type } }) => {
   return (
     <div>
       <Title children={`${show.title} • Ep. ${ep} • AniWatch`} />
-      <Player url={link} isDubbed={dubbed ?? false} />
+      <Player
+        url={link}
+        isDubbed={dubbed ?? false}
+        watched={(show.progress ?? 0) >= Number(ep)}
+      />
     </div>
   );
 };
