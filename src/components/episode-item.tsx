@@ -4,7 +4,7 @@ import { Episode } from "@/interfaces/Episode";
 import secondsToHms from "@/utils/seconds-to-hms";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 
 type Props = {
   id: number;
@@ -19,6 +19,13 @@ const EpisodeItem = ({
   const { ep, type } = useParams<{ ep: string; type?: "sub" | "dub" }>();
   const active = Number(ep) == number;
 
+  const translation = useMemo(() => {
+    if (typeof localStorage === "undefined") return "sub";
+    const type = localStorage.getItem("translation") as "sub" | "dub" | null;
+
+    return type || "sub";
+  }, []);
+
   useEffect(() => {
     if (Number(ep) == number) {
       listElementRef.current?.scrollIntoView({
@@ -32,7 +39,7 @@ const EpisodeItem = ({
     <li ref={listElementRef}>
       <Link
         className="flex items-center gap-4 hover:bg-zinc-800 transition-colors rounded"
-        href={`/watch/${id}/${type || "sub"}/${number}`}
+        href={`/watch/${id}/${type || translation || "sub"}/${number}`}
       >
         <img
           src={thumbnail}

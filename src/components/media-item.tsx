@@ -1,8 +1,10 @@
+"use client";
 /* eslint-disable @next/next/no-img-element */
 import Icon from "@/components/iconify";
 import Media from "@/interfaces/Media";
 import Link from "next/link";
-import React from "react";
+import { usePathname } from "next/navigation";
+import React, { useMemo } from "react";
 
 interface Props {
   canContinue?: boolean;
@@ -13,6 +15,13 @@ const MediaItem = ({
   media: { cover, episodes, id, progress, title },
   canContinue = false,
 }: Props) => {
+  const translation = useMemo(() => {
+    if (typeof localStorage === "undefined") return "sub";
+    const type = localStorage.getItem("translation") as "sub" | "dub" | null;
+
+    return type || "sub";
+  }, []);
+
   return (
     <div key={id} className="flex bg-zinc-800 rounded-md overflow-hidden">
       <Link href={`/show/${id}`}>
@@ -29,7 +38,7 @@ const MediaItem = ({
           {canContinue && (
             <Link
               className="text-purple-500 text-sm underline flex items-center gap-2 active:text-purple-800"
-              href={`/watch/${id}/sub/${progress + 1}`}
+              href={`/watch/${id}/${translation}/${progress + 1}`}
             >
               <Icon icon="tabler:player-play-filled" />
               Continue Watching

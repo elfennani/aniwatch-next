@@ -58,7 +58,7 @@ export const GET = async (request: Request, { params: { id: idString } }: Params
       thumbnail: ep.thumbnails
         .filter((t) => !t.includes("cdnfile"))
         .map(t => t.startsWith("http") ? t : (source + t))[0]
-    })).sort(ep => -ep.number)
+    })).sort((ep, ep2) => ep2.number - ep.number)
   }
 
   return NextResponse.json(showDetails)

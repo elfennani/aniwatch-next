@@ -1,7 +1,7 @@
 /* eslint-disable react/no-children-prop */
 /* eslint-disable @next/next/no-img-element */
 import { Metadata, NextPage } from "next";
-import Player from "./Player";
+import Player from "./player";
 import server_fetch from "@/utils/server-fetch";
 import { ShowDetails } from "@/interfaces/ShowDetails";
 import { redirect } from "next/navigation";
@@ -45,29 +45,7 @@ const WatchByIdPage: NextPage<Props> = async ({ params: { id, ep, type } }) => {
   return (
     <div>
       <Title children={`${show.title} • Ep. ${ep} • AniWatch`} />
-      <Player url={link} />
-      {dubbed && (
-        <div className="flex">
-          <Link
-            href={`/watch/${id}/sub/${ep}`}
-            className={twMerge(
-              "flex flex-1 items-center justify-center h-12 font-medium text-sm text-zinc-500",
-              type == "sub" && "bg-purple-500 text-white pointer-events-none"
-            )}
-          >
-            SUB
-          </Link>
-          <Link
-            href={`/watch/${id}/dub/${ep}`}
-            className={twMerge(
-              "flex flex-1 items-center justify-center h-12 font-medium text-sm text-zinc-500",
-              type == "dub" && "bg-purple-500 text-white pointer-events-none"
-            )}
-          >
-            DUB
-          </Link>
-        </div>
-      )}
+      <Player url={link} isDubbed={dubbed ?? false} />
     </div>
   );
 };
