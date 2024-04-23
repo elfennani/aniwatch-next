@@ -1,9 +1,7 @@
 "use client";
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent } from "react";
 import Icon from "@/components/iconify";
 import { NextPage } from "next";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import useSearchQuery from "@/hooks/use-search-query";
 import MediaItem from "@/components/media-item";
 import { useQueryState } from "nuqs";

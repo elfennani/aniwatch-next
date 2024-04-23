@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import { CookiesProvider } from "next-client-cookies/server";
 import Navigation from "@/components/navigation";
 
-const inter = Inter({ subsets: ["latin"] });
+const manrope = Manrope({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
@@ -21,15 +21,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <Providers>
-      <CookiesProvider>
-        <html lang="en">
-          <body className={`${inter.className} bg-zinc-900 text-white`}>
+    <CookiesProvider>
+      <html lang="en">
+        <body className={`${manrope.className} bg-zinc-900 text-white`}>
+          <Providers>
             <Navigation />
             {children}
-          </body>
-        </html>
-      </CookiesProvider>
-    </Providers>
+          </Providers>
+        </body>
+      </html>
+    </CookiesProvider>
   );
 }
