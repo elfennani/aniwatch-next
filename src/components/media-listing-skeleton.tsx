@@ -6,7 +6,7 @@ type Props = {
 
 const MediaListingSkeleton = ({ length = 1 }: Props) => {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 animate-pulse">
       <div className="h-8 max-w-full w-40 rounded bg-zinc-800" />
       {Array.from({ length }, (_, index) => (
         <div key={index} className="flex border border-zinc-800 rounded-md">
