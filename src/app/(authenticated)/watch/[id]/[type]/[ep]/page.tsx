@@ -9,6 +9,7 @@ import { twMerge } from "tailwind-merge";
 import Link from "next/link";
 import { cache } from "react";
 import Title from "@/components/title-setter-client";
+import { headers } from "next/headers";
 
 interface Props {
   params: {
@@ -29,6 +30,11 @@ const WatchByIdPage: NextPage<Props> = async ({ params: { id, ep, type } }) => {
   if (!["sub", "dub"].includes(type)) redirect("/");
 
   const show = await fetchShow(Number(id));
+
+  if (!show.episodes || !show.allanimeId) {
+    const referer = headers().get("Referer");
+    redirect(referer ?? `${process.env.URL}/media/${id}`);
+  }
 
   if (
     !show.episodes.find((episode) => episode.number == Number(ep))?.dub &&

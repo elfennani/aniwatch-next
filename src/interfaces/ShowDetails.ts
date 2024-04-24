@@ -1,18 +1,22 @@
 import { Episode } from './Episode'
+import ShowRelation from './ShowRelation';
+import Tag from './Tag';
 
 export interface ShowDetails {
   id: number
-  allanimeId: string
-  episodes: Episode[]
+  allanimeId?: string
+  episodes?: Episode[]
   title: string;
-  banner: string;
+  banner: string | null;
   cover: string;
   type: "ANIME" | "MANGA",
   description: string
-  genres: string[]
+  genres?: string[]
   episodesCount: number
   progress?: number
-  year: number
+  year: number,
+  relations: ShowRelation[]
+  tags?: Tag[]
 }
 
 /**

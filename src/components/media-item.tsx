@@ -24,11 +24,11 @@ const MediaItem = ({
 
   return (
     <div key={id} className="flex bg-zinc-800 rounded-md overflow-hidden">
-      <Link href={`/show/${id}`}>
+      <Link href={`/media/${id}`}>
         <img src={cover} alt={title} className="h-32" />
       </Link>
       <div className="p-4 flex flex-col justify-between flex-1">
-        <Link href={`/show/${id}`}>{title}</Link>
+        <Link href={`/media/${id}`}>{title}</Link>
         <div className="flex w-full justify-between items-end">
           {!!progress && (
             <p className="text-xs text-zinc-500">

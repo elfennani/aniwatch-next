@@ -25,17 +25,19 @@ export const GET = async (request: Request, { params: { id: idString } }: Params
     (show) => show.aniListId == id
   );
 
-  if (!show) {
-    return Response.json({ error: "Failed to find allanime show" }, { status: 404 })
+
+
+  let episodes: Episodes | undefined;
+  const showId = show?._id
+
+  if (show) {
+    const max = show.availableEpisodesDetail.sub.length
+
+    episodes = await retry(
+      () => allanime.request(episodes_details_query, { showId, max }),
+      { retries: 3 }
+    );
   }
-
-  const showId = show._id
-  const max = show.availableEpisodesDetail.sub.length
-
-  const episodes: Episodes = await retry(
-    () => allanime.request(episodes_details_query, { showId, max }),
-    { retries: 3 }
-  );
 
   const showDetails: ShowDetails = {
     id,
@@ -49,16 +51,30 @@ export const GET = async (request: Request, { params: { id: idString } }: Params
     episodesCount: media?.episodes ?? NaN,
     type: media?.type!,
     year: media?.seasonYear!,
-    episodes: episodes.episodeInfos.map(ep => ({
+    episodes: episodes?.episodeInfos.map(ep => ({
       id: ep._id,
       number: ep.episodeIdNum,
-      dub: show.availableEpisodesDetail.dub.includes(String(ep.episodeIdNum)),
+      dub: show?.availableEpisodesDetail.dub.includes(String(ep.episodeIdNum)) ?? false,
       duration: ep.vidInforssub?.vidDuration,
       resolution: ep.vidInforssub?.vidResolution,
       thumbnail: ep.thumbnails
         .filter((t) => !t.includes("cdnfile"))
         .map(t => t.startsWith("http") ? t : (source + t))[0]
-    })).sort((ep, ep2) => ep2.number - ep.number)
+    })).sort((ep, ep2) => ep2.number - ep.number),
+    relations: media?.relations?.edges?.map(edge => ({
+      id: edge?.node?.id!,
+      title: edge?.node?.title?.english || edge?.node?.title?.native!,
+      relationType: edge?.relationType!,
+      cover: edge?.node?.coverImage?.large!,
+      type: edge?.node?.type!
+    })) ?? [],
+    tags: media?.tags?.map(tag => ({
+      id: tag?.id!,
+      name: tag?.name!,
+      rank: tag?.rank ?? 0,
+      spoiler: tag?.isGeneralSpoiler || tag?.isMediaSpoiler || false,
+      description: tag?.description ?? undefined
+    }))
   }
 
   return NextResponse.json(showDetails)
@@ -103,22 +119,50 @@ const show_query = `
 const media_query = graphql(`
   query GetMedia($id: Int) {
     media:Media(id: $id, type: ANIME) {
+      ...media
+      relations{
+        edges{
+          relationType(version: 2)
+          node{
+            id
+            title{
+              english
+              native
+            }
+            coverImage{
+              large
+            }
+            type
+          }
+        }
+      }
+    }
+  }
+
+  fragment media on Media{
+    id
+    genres
+    episodes
+    description
+    bannerImage
+    type
+    seasonYear
+    title {
+      userPreferred
+    }
+    coverImage {
+      extraLarge
+    }
+    mediaListEntry{
+      progress
+    }
+    tags{
       id
-      genres
-      episodes
+      name
       description
-      bannerImage
-      type
-      seasonYear
-      title {
-        userPreferred
-      }
-      coverImage {
-        extraLarge
-      }
-      mediaListEntry{
-        progress
-      }
+      rank
+      isMediaSpoiler
+      isGeneralSpoiler
     }
   }
 `);
