@@ -14,7 +14,7 @@ const Episodes = async ({ id }: Props) => {
   return (
     <div>
       <ul className="flex flex-col-reverse gap-4">
-        {show.episodes.map((episode) => (
+        {show.episodes?.map((episode) => (
           <EpisodeItem key={episode.id} id={show.id} details={episode} />
         ))}
       </ul>
