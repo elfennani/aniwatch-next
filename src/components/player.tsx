@@ -7,6 +7,7 @@ import {
   KeyboardEvent,
   MouseEventHandler,
   Suspense,
+  TouchEvent,
   useEffect,
   useRef,
   useState,
@@ -45,8 +46,6 @@ const Player = (props: Props) => {
   const [hiddenControls, setHiddenControls] = useState(false);
   const [controlsFocused, setControlsFocused] = useState(false);
   const params = useParams<Params>();
-
-  console.log(props.nextEpisode);
 
   useEffect(() => {
     showControls();
@@ -143,6 +142,15 @@ const Player = (props: Props) => {
   const shouldControlsShowUp =
     !hiddenControls || settingsOpen || !isPlaying || controlsFocused;
 
+  function handleTouchEnd(event: TouchEvent<HTMLVideoElement>) {
+    event.preventDefault();
+    if (shouldControlsShowUp) {
+      togglePlaying();
+    } else {
+      showControls();
+    }
+  }
+
   return (
     <div
       ref={videoContainerRef}
@@ -151,6 +159,7 @@ const Player = (props: Props) => {
       <video
         autoFocus
         onClick={togglePlaying}
+        onTouchEnd={handleTouchEnd}
         onDoubleClick={handleFullScreen}
         onKeyDown={handleKeyDown}
         onPlay={() => setIsPlaying(true)}
