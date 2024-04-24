@@ -24,10 +24,12 @@ export default function RootLayout({
     <CookiesProvider>
       <html lang="en">
         <body className={`${manrope.className} bg-zinc-900 text-white`}>
-          <Providers>
-            <Navigation />
-            {children}
-          </Providers>
+          <main className="max-w-3xl mx-auto">
+            <Providers>
+              <Navigation />
+              {children}
+            </Providers>
+          </main>
         </body>
       </html>
     </CookiesProvider>

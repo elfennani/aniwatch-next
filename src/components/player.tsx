@@ -3,8 +3,15 @@ import secondsToHms from "@/utils/seconds-to-hms";
 import Hls, { Events, Level } from "hls.js";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { MouseEventHandler, useEffect, useRef, useState } from "react";
+import {
+  KeyboardEvent,
+  MouseEventHandler,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { twJoin, twMerge } from "tailwind-merge";
+import Settings from "./player-settings";
 
 type Props = {
   url: string;
@@ -21,6 +28,7 @@ type Params = {
 const Player = (props: Props) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [levels, setLevels] = useState<Level[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -30,6 +38,8 @@ const Player = (props: Props) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [updatedEntry, setUpdatedEntry] = useState(false);
+  const [hiddenControls, setHiddenControls] = useState(false);
+  const [controlsFocused, setControlsFocused] = useState(false);
   const params = useParams<Params>();
 
   useEffect(() => {
@@ -107,22 +117,54 @@ const Player = (props: Props) => {
     video.currentTime = pos * video.duration;
   };
 
+  function handleMouseMove() {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setHiddenControls(false);
+    timeoutRef.current = setTimeout(() => setHiddenControls(true), 3000);
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLVideoElement>) {
+    if (event.key.toLowerCase() == "f") {
+      handleFullScreen();
+    }
+    if (event.key == " ") {
+      togglePlaying();
+    }
+  }
+
   return (
-    <div ref={videoContainerRef} className="relative aspect-video w-full">
+    <div
+      ref={videoContainerRef}
+      className="relative aspect-video w-full overflow-hidden"
+    >
       <video
+        autoFocus
+        onMouseDown={togglePlaying}
+        onKeyDown={handleKeyDown}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onTimeUpdate={(ev) => setProgress(ev.currentTarget.currentTime)}
         onDurationChange={(ev) => setDuration(ev.currentTarget.duration)}
         className="w-full object-contain h-full bg-black"
         disablePictureInPicture={false}
+        onMouseMove={handleMouseMove}
         ref={videoRef}
         autoPlay={
           typeof localStorage != "undefined" &&
           localStorage.getItem("autoplay") == "1"
         }
       />
-      <div className="overflow-hidden absolute flex items-center bottom-2 h-12 left-2 right-2 rounded-lg bg-black bg-opacity-50 backdrop-blur-sm">
+
+      <div
+        onMouseEnter={() => setControlsFocused(true)}
+        onMouseLeave={() => setControlsFocused(false)}
+        onClick={() => videoRef.current?.focus()}
+        className={twMerge(
+          "overflow-hidden absolute flex items-center -bottom-14 h-12 left-2 right-2 rounded-lg bg-black bg-opacity-50 backdrop-blur-sm transition-all duration-300",
+          (!hiddenControls || settingsOpen || !isPlaying || controlsFocused) &&
+            "bottom-2"
+        )}
+      >
         <button
           className="py-2 px-3 hover:bg-black hover:bg-opacity-50 transition-colors self-stretch flex items-center justify-center"
           onClick={togglePlaying}
@@ -165,6 +207,7 @@ const Player = (props: Props) => {
           />
         </button>
       </div>
+
       {settingsOpen && (
         <Settings
           levels={levels}
@@ -173,150 +216,6 @@ const Player = (props: Props) => {
           onChangeLevel={handleChangeLevel}
           isDubbed={props.isDubbed}
         />
-      )}
-    </div>
-  );
-};
-
-interface SettingsProps {
-  levels: Level[];
-  currentLevel: Level;
-  onClose: () => void;
-  onChangeLevel: (level: number) => void;
-  isDubbed: boolean;
-}
-
-const Settings = ({
-  currentLevel,
-  levels,
-  onClose,
-  onChangeLevel,
-  isDubbed,
-}: SettingsProps) => {
-  const [page, setPage] = useState<"start" | "level-selection">("start");
-  const [autoplay, setAutoplay] = useState(
-    typeof localStorage != "undefined" &&
-      localStorage.getItem("autoplay") == "1"
-  );
-  const { type, id, ep } = useParams<Params>();
-
-  return (
-    <div className="absolute flex flex-col top-2 right-2 bottom-16 w-40 bg-zinc-800 text-zinc-200 rounded-lg">
-      <header className="relative text-sm font-bold uppercase p-2 text-center">
-        {page != "start" && (
-          <button
-            onClick={() => setPage("start")}
-            className="absolute left-0 top-0 h-full p-2 flex items-center justify-center hover:bg-black hover:bg-opacity-25 transition-colors rounded-tl-lg"
-          >
-            <span className="i-tabler-chevron-left text-lg" />
-          </button>
-        )}
-        {page == "start" && "Settings"}
-        {page == "level-selection" && "Quality"}
-        <button
-          onClick={() => onClose()}
-          className="absolute right-0 top-0 h-full p-2 flex items-center justify-center hover:bg-black hover:bg-opacity-25 transition-colors rounded-tr-lg"
-        >
-          <span className="i-tabler-x text-lg" />
-        </button>
-      </header>
-      {page == "start" && (
-        <div className="overflow-y-auto flex-1">
-          <button
-            onClick={() => setPage("level-selection")}
-            className="py-3 px-4 flex gap-2 items-center hover:bg-black hover:bg-opacity-25 w-full transition-colors"
-          >
-            <span
-              className={
-                currentLevel.height >= 720
-                  ? "i-tabler-badge-hd-filled text-lg"
-                  : "i-tabler-badge-sd-filled text-lg"
-              }
-            />
-            <span className="flex-1 text-left text-sm">
-              {currentLevel.name}
-            </span>
-            <span className="i-tabler-chevron-right" />
-          </button>
-          {isDubbed && (
-            <Link
-              replace
-              href={
-                type == "dub"
-                  ? `/watch/${id}/sub/${ep}`
-                  : `/watch/${id}/dub/${ep}`
-              }
-              onClick={() => {
-                localStorage.setItem(
-                  "translation",
-                  type == "sub" ? "dub" : "sub"
-                );
-              }}
-              className="py-3 px-4 flex gap-2 items-center hover:bg-black hover:bg-opacity-25 w-full transition-colors"
-            >
-              <span className="i-tabler-bubble-text text-lg" />
-              <span className="flex-1 text-left text-sm text-zinc-500">
-                <span
-                  className={type == "dub" ? "text-purple-500 font-bold" : ""}
-                >
-                  DUB
-                </span>
-                {" | "}
-                <span
-                  className={type == "sub" ? "text-purple-500 font-bold" : ""}
-                >
-                  SUB
-                </span>
-              </span>
-            </Link>
-          )}
-          <button
-            onClick={() => {
-              setAutoplay((autoplay) => {
-                localStorage.setItem("autoplay", autoplay ? "0" : "1");
-                return !autoplay;
-              });
-            }}
-            className="py-3 px-4 flex gap-2 items-center hover:bg-black hover:bg-opacity-25 w-full transition-colors"
-          >
-            <span className="i-tabler-player-play text-lg" />
-            <span
-              className={twMerge(
-                "flex-1 text-left text-sm text-zinc-500 line-clamp-1",
-                autoplay && "text-purple-500 font-bold"
-              )}
-            >
-              AutoPlay: {autoplay ? "On" : "Off"}
-            </span>
-          </button>
-        </div>
-      )}
-      {page == "level-selection" && (
-        <div className="overflow-y-auto flex-1">
-          {levels
-            .map((level, index) => {
-              return (
-                <button
-                  key={level.name}
-                  onClick={() => {
-                    onChangeLevel(index);
-                    setPage("start");
-                  }}
-                  className="py-3 px-4 flex gap-2 items-center hover:bg-black hover:bg-opacity-25 w-full transition-colors"
-                >
-                  <span
-                    className={
-                      level.height >= 720
-                        ? "i-tabler-badge-hd-filled text-lg"
-                        : "i-tabler-badge-sd-filled text-lg"
-                    }
-                  />
-                  <span className="flex-1 text-left text-sm">{level.name}</span>
-                </button>
-              );
-            })
-            .toReversed()}
-        </div>
       )}
     </div>
   );

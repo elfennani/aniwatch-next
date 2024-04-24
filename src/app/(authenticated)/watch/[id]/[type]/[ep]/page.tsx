@@ -1,7 +1,7 @@
 /* eslint-disable react/no-children-prop */
 /* eslint-disable @next/next/no-img-element */
 import { Metadata, NextPage } from "next";
-import Player from "./player";
+import Player from "../../../../../../components/player";
 import server_fetch from "@/utils/server-fetch";
 import { ShowDetails } from "@/interfaces/ShowDetails";
 import { redirect } from "next/navigation";
