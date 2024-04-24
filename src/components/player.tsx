@@ -1,22 +1,26 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import secondsToHms from "@/utils/seconds-to-hms";
 import Hls, { Events, Level } from "hls.js";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   KeyboardEvent,
   MouseEventHandler,
+  Suspense,
   useEffect,
   useRef,
   useState,
 } from "react";
 import { twJoin, twMerge } from "tailwind-merge";
 import Settings from "./player-settings";
+import Link from "next/link";
+import { Episode } from "@/interfaces/Episode";
 
 type Props = {
   url: string;
   isDubbed: boolean;
   watched: boolean;
+  nextEpisode?: Episode;
 };
 
 type Params = {
@@ -42,7 +46,10 @@ const Player = (props: Props) => {
   const [controlsFocused, setControlsFocused] = useState(false);
   const params = useParams<Params>();
 
+  console.log(props.nextEpisode);
+
   useEffect(() => {
+    showControls();
     if (!document) return;
     const handleChange: (ev: Event) => any = (ev) =>
       setIsFullscreen(document.fullscreenElement !== null);
@@ -103,6 +110,7 @@ const Player = (props: Props) => {
   };
 
   const togglePlaying = () => {
+    showControls();
     if (videoRef.current?.paused || videoRef.current?.ended) {
       videoRef.current.play();
     } else {
@@ -117,7 +125,7 @@ const Player = (props: Props) => {
     video.currentTime = pos * video.duration;
   };
 
-  function handleMouseMove() {
+  function showControls() {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setHiddenControls(false);
     timeoutRef.current = setTimeout(() => setHiddenControls(true), 3000);
@@ -132,14 +140,18 @@ const Player = (props: Props) => {
     }
   }
 
+  const shouldControlsShowUp =
+    !hiddenControls || settingsOpen || !isPlaying || controlsFocused;
+
   return (
     <div
       ref={videoContainerRef}
-      className="relative aspect-video w-full overflow-hidden"
+      className="relative aspect-video w-full overflow-hidden md:rounded-xl md:mt-4"
     >
       <video
         autoFocus
-        onMouseDown={togglePlaying}
+        onClick={togglePlaying}
+        onDoubleClick={handleFullScreen}
         onKeyDown={handleKeyDown}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
@@ -147,7 +159,7 @@ const Player = (props: Props) => {
         onDurationChange={(ev) => setDuration(ev.currentTarget.duration)}
         className="w-full object-contain h-full bg-black"
         disablePictureInPicture={false}
-        onMouseMove={handleMouseMove}
+        onMouseMove={showControls}
         ref={videoRef}
         autoPlay={
           typeof localStorage != "undefined" &&
@@ -161,8 +173,7 @@ const Player = (props: Props) => {
         onClick={() => videoRef.current?.focus()}
         className={twMerge(
           "overflow-hidden absolute flex items-center -bottom-14 h-12 left-2 right-2 rounded-lg bg-black bg-opacity-50 backdrop-blur-sm transition-all duration-300",
-          (!hiddenControls || settingsOpen || !isPlaying || controlsFocused) &&
-            "bottom-2"
+          shouldControlsShowUp && "bottom-2"
         )}
       >
         <button
@@ -207,6 +218,30 @@ const Player = (props: Props) => {
           />
         </button>
       </div>
+
+      {!!props.nextEpisode && (
+        <Link
+          href={`/watch/${params.id}/${params.type}/${Number(params.ep) + 1}`}
+          className={twMerge(
+            "flex items-center gap-4 w-72 absolute -top-20 right-2 rounded-lg p-2 bg-zinc-800 backdrop-blur bg-opacity-80 z-10 transition-all duration-300",
+            shouldControlsShowUp && duration - progress < 120 && "top-2"
+          )}
+        >
+          <img
+            src={props.nextEpisode.thumbnail}
+            alt=""
+            className="h-14 rounded"
+          />
+          <div>
+            <p className="text-xs font-bold uppercase text-purple-500 flex items-center gap-1">
+              <span className="i-tabler-player-track-next-filled" /> Up Next
+            </p>
+            <h2 className="font-semibold line-clamp-1">
+              Episode {props.nextEpisode.number}
+            </h2>
+          </div>
+        </Link>
+      )}
 
       {settingsOpen && (
         <Settings

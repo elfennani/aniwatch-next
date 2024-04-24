@@ -49,6 +49,10 @@ const WatchByIdPage: NextPage<Props> = async ({ params: { id, ep, type } }) => {
     (episode) => episode.number == Number(ep)
   )?.dub;
 
+  const nextEpisode = show.episodes.find((episode) => {
+    return episode.number == Number(ep) + 1;
+  });
+
   return (
     <div>
       <Title children={`${show.title} • Ep. ${ep} • AniWatch`} />
@@ -56,6 +60,7 @@ const WatchByIdPage: NextPage<Props> = async ({ params: { id, ep, type } }) => {
         url={link}
         isDubbed={dubbed ?? false}
         watched={(show.progress ?? 0) >= Number(ep)}
+        nextEpisode={nextEpisode}
       />
     </div>
   );
